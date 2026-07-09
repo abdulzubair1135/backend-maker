@@ -3,70 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>God Mode - Websoft Solutions Admin Portal</title>
+  <title>Control Panel - Websoft Solutions Enterprise SaaS</title>
+  
+  <!-- Font Style sheet -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide SVG Icons and Chart.js libraries -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <link rel="stylesheet" href="admin.css">
 </head>
 <body class="admin-body">
-  <div class="background-decor">
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
-  </div>
 
-  <!-- Sidebar Nav -->
-  <aside class="admin-sidebar glass">
-    <div class="sidebar-header">
-      <div class="logo-badge">WSS</div>
-      <div class="brand-text">
-        <h2>Websoft</h2>
-        <span>Control Panel v2.0</span>
+  <!-- ================= SIDEBAR NAV ================= -->
+  <aside class="admin-sidebar glass" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-circle">WSS</div>
+      <span class="brand-name">Websoft Enterprise</span>
+      <button class="sidebar-collapse-btn" id="sidebarCollapseBtn">
+        <i data-lucide="chevron-left"></i>
+      </button>
+    </div>
+
+    <!-- Search Input in Sidebar -->
+    <div class="sidebar-search">
+      <div class="search-box">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="globalSearchInput" placeholder="Press '/' to search...">
       </div>
     </div>
-    
+
     <nav class="sidebar-nav">
-      <button class="nav-btn active" data-tab="dashboard">
-        <span class="nav-icon">📊</span> Dashboard
-      </button>
-      <button class="nav-btn" data-tab="leads">
-        <span class="nav-icon">📥</span> Leads & Billings
-      </button>
-      <button class="nav-btn" data-tab="cms">
-        <span class="nav-icon">📝</span> CMS & Pages
-      </button>
-      <button class="nav-btn" data-tab="users">
-        <span class="nav-icon">👤</span> User Accounts
-      </button>
-      <button class="nav-btn" data-tab="media">
-        <span class="nav-icon">🖼️</span> Media Manager
-      </button>
-      <button class="nav-btn" data-tab="logs">
-        <span class="nav-icon">📜</span> System Logs
-      </button>
-      <button class="nav-btn" data-tab="backups">
-        <span class="nav-icon">💾</span> Database Backups
-      </button>
+      <div class="nav-section">Main Console</div>
+      <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+        <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
+      </a>
+      <a href="#leads" class="nav-item" data-tab="leads">
+        <i data-lucide="inbox"></i> <span>Leads & Bookings</span>
+        <span class="badge badge-amber" id="leadsPendingBadge">0</span>
+      </a>
+      
+      <div class="nav-section">Content Management</div>
+      <a href="#cms" class="nav-item" data-tab="cms">
+        <i data-lucide="edit-3"></i> <span>CMS & Slider</span>
+      </a>
+      <a href="#media" class="nav-item" data-tab="media">
+        <i data-lucide="folder-open"></i> <span>Media Manager</span>
+      </a>
+
+      <div class="nav-section">Security & Logs</div>
+      <a href="#users" class="nav-item" data-tab="users">
+        <i data-lucide="users"></i> <span>Users & Roles</span>
+      </a>
+      <a href="#logs" class="nav-item" data-tab="logs">
+        <i data-lucide="shield-alert"></i> <span>Audit Logs</span>
+      </a>
+      <a href="#backups" class="nav-item" data-tab="backups">
+        <i data-lucide="database"></i> <span>Backups</span>
+      </a>
+
+      <div class="nav-section">Platform Settings</div>
+      <a href="#settings" class="nav-item" data-tab="settings">
+        <i data-lucide="settings"></i> <span>System Settings</span>
+      </a>
     </nav>
 
-    <div class="sidebar-footer">
-      <span class="user-info">Logged in: <strong id="adminUsername">admin</strong></span>
-      <button id="logoutBtn" class="btn btn-secondary btn-block">Sign Out</button>
+    <!-- User Profile display bottom of sidebar -->
+    <div class="sidebar-profile">
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="profile-avatar">
+      <div class="profile-meta">
+        <span class="profile-name" id="sidebarProfileName">Super Admin</span>
+        <span class="profile-role">Super Admin</span>
+      </div>
+      <button class="profile-logout-btn" id="sidebarLogoutBtn" title="Logout Session">
+        <i data-lucide="log-out"></i>
+      </button>
     </div>
   </aside>
 
-  <!-- Main View -->
+  <!-- ================= MAIN LAYOUT WRAPPER ================= -->
   <div class="admin-layout-content">
+    
+    <!-- NAVBAR -->
     <header class="admin-header glass">
       <div class="header-left">
-        <h1 id="viewTitle">Dashboard</h1>
-      </div>
-      <div class="header-right">
-        <div id="csrfDisplay" style="font-size: 11px; color: var(--text-muted);">Secure CSRF Session Active</div>
-        <button id="refreshBtn" class="btn btn-secondary">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Refresh Data
+        <!-- Collapsed menu button -->
+        <button class="menu-toggle-btn" id="menuToggleBtn">
+          <i data-lucide="menu"></i>
         </button>
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+          <span class="crumb">Console</span>
+          <i data-lucide="chevron-right" class="crumb-separator"></i>
+          <span class="crumb active" id="breadcrumbActive">Dashboard</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Quick actions -->
+        <div class="header-action-group">
+          <!-- Real-time Notifications Bell -->
+          <div class="dropdown-wrapper">
+            <button class="header-action-btn" id="notificationBellBtn">
+              <i data-lucide="bell"></i>
+              <span class="bell-badge" id="bellCounter">3</span>
+            </button>
+            <!-- Dropdown menu notifications -->
+            <div class="dropdown-pane glass hidden" id="notificationDropdown">
+              <div class="dropdown-header">
+                <h3>System Notifications</h3>
+                <button class="text-btn" id="markAllReadBtn">Clear All</button>
+              </div>
+              <div class="dropdown-list" id="notificationList">
+                <div class="notification-item unread">
+                  <span class="dot"></span>
+                  <div class="notif-body">
+                    <p>New dish billing recharge registered</p>
+                    <span>2 mins ago</span>
+                  </div>
+                </div>
+                <div class="notification-item unread">
+                  <span class="dot"></span>
+                  <div class="notif-body">
+                    <p>MySQL connection check backup saved successfully</p>
+                    <span>1 hour ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fullscreen Toggle -->
+          <button class="header-action-btn" id="fullscreenToggleBtn" title="Toggle Fullscreen">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          
+          <!-- Localization Dropdown -->
+          <div class="dropdown-wrapper">
+            <button class="header-action-btn" id="languageBtn">
+              <i data-lucide="languages"></i>
+            </button>
+            <div class="dropdown-pane glass hidden" id="languageDropdown" style="width: 120px;">
+              <button class="lang-option active" data-lang="en">English</button>
+              <button class="lang-option" data-lang="hn">Hinglish</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown-wrapper">
+          <div class="user-pill" id="userPill">
+            <span class="user-status-dot online"></span>
+            <span class="username" id="navbarUsername">Admin</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="dropdown-pane glass hidden" id="profileDropdown" style="width: 180px;">
+            <a href="#settings" class="dropdown-link" data-tab="settings">
+              <i data-lucide="user"></i> Account Settings
+            </a>
+            <hr class="divider">
+            <button class="dropdown-link text-danger" id="logoutBtn">
+              <i data-lucide="log-out"></i> Sign Out
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -74,58 +177,116 @@
       
       <!-- ================= TAB: DASHBOARD ================= -->
       <section id="tab-dashboard" class="tab-pane active">
-        <!-- Stats cards -->
-        <div class="stats-grid">
-          <div class="stat-card glass">
-            <div class="stat-icon bg-purple">📥</div>
-            <div class="stat-info">
-              <h3>Total Leads</h3>
-              <p id="statTotal">0</p>
+        <!-- Dynamic metrics cards -->
+        <div class="metrics-grid">
+          <div class="metric-card glass card-glow-purple">
+            <div class="card-top">
+              <span class="card-label">Live Active Sessions</span>
+              <span class="card-trend upward">+12.4%</span>
+            </div>
+            <div class="card-value" id="widgetLiveUsers">4</div>
+            <div class="card-description">Online visitors browsing website</div>
+          </div>
+          <div class="metric-card glass card-glow-blue">
+            <div class="card-top">
+              <span class="card-label">Total Inquiries</span>
+              <span class="card-trend upward">+8.1%</span>
+            </div>
+            <div class="card-value" id="widgetTotalLeads">0</div>
+            <div class="card-description">Contact & lead form submissions</div>
+          </div>
+          <div class="metric-card glass card-glow-green">
+            <div class="card-top">
+              <span class="card-label">CPU System Load</span>
+              <span class="card-trend downward">-2.1%</span>
+            </div>
+            <div class="card-value" id="widgetCpu">0%</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill bg-blue" id="widgetCpuProgress" style="width: 0%;"></div>
             </div>
           </div>
-          <div class="stat-card glass">
-            <div class="stat-icon bg-amber">⏳</div>
-            <div class="stat-info">
-              <h3>Pending</h3>
-              <p id="statPending">0</p>
+          <div class="metric-card glass card-glow-amber">
+            <div class="card-top">
+              <span class="card-label">RAM Allocated</span>
+              <span class="card-trend upward">Stable</span>
             </div>
-          </div>
-          <div class="stat-card glass">
-            <div class="stat-icon bg-blue">📞</div>
-            <div class="stat-info">
-              <h3>Contacted</h3>
-              <p id="statContacted">0</p>
-            </div>
-          </div>
-          <div class="stat-card glass">
-            <div class="stat-icon bg-green">✅</div>
-            <div class="stat-info">
-              <h3>Completed</h3>
-              <p id="statCompleted">0</p>
+            <div class="card-value" id="widgetRam">0%</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill bg-purple" id="widgetRamProgress" style="width: 0%;"></div>
             </div>
           </div>
         </div>
 
-        <div class="dashboard-details-grid">
-          <!-- Recent Activity -->
-          <div class="dashboard-block glass">
-            <h3>Recent System Activities</h3>
-            <div class="log-timeline" id="recentActivityList">
-              <p class="text-muted">Loading activity...</p>
+        <!-- Dashboard Charts layout section -->
+        <div class="charts-layout-grid">
+          <!-- Area Line Chart for Daily visitors counts -->
+          <div class="chart-container glass">
+            <div class="chart-header">
+              <h3>System Traffic Analytics</h3>
+              <div class="chart-legend">
+                <span class="legend-dot bg-purple"></span> Page Views
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="trafficChart"></canvas>
             </div>
           </div>
 
-          <!-- Category distribution -->
+          <!-- Donut Pie Chart for device and browser stats -->
+          <div class="chart-container glass">
+            <div class="chart-header">
+              <h3>Top Browsers & Devices</h3>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="browserChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Logs list and details bottom section -->
+        <div class="dashboard-details-grid">
+          <!-- System logs timeline -->
           <div class="dashboard-block glass">
-            <h3>Leads By Categories</h3>
-            <div class="category-list" id="categoryDistributionList">
-              <p class="text-muted">Loading metrics...</p>
+            <div class="block-header">
+              <h3>Live Activity Timeline</h3>
+              <button class="btn btn-secondary text-sm" id="viewAllActivityBtn">View All</button>
+            </div>
+            <div class="log-timeline" id="recentActivityList">
+              <!-- Dynamically populated activity rows -->
+              <p class="text-muted">Loading activities timeline...</p>
+            </div>
+          </div>
+
+          <!-- DB and API monitoring diagnostics status -->
+          <div class="dashboard-block glass">
+            <h3>Enterprise Services Diagnostic Health</h3>
+            <div class="diagnostic-list">
+              <div class="diag-row">
+                <span class="diag-label"><i data-lucide="database" class="icon-sm"></i> MySQL Connections</span>
+                <span class="badge badge-green">Healthy</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label"><i data-lucide="hard-drive" class="icon-sm"></i> Disk Storage Space</span>
+                <span class="badge badge-green">42.1% Used</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label"><i data-lucide="globe" class="icon-sm"></i> SSL Certificate Expiry</span>
+                <span class="badge badge-blue">Valid (289 days left)</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label"><i data-lucide="mail" class="icon-sm"></i> SMTP Mail Queue Service</span>
+                <span class="badge badge-green" id="diagSmtpStatus">Connected</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label"><i data-lucide="shield" class="icon-sm"></i> CORS & CSP Policies</span>
+                <span class="badge badge-green">Strict Enforced</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= TAB: LEADS ================= -->
+      <!-- ================= TAB: LEADS & BOOKINGS ================= -->
       <section id="tab-leads" class="tab-pane">
         <div class="toolbar-section glass">
           <div class="filter-group">
@@ -140,83 +301,132 @@
           </div>
         </div>
 
-        <div class="leads-list" id="leadsList">
-          <p class="text-muted">Loading leads...</p>
+        <div class="leads-list-wrapper glass">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Contact Info</th>
+                  <th>Request Category</th>
+                  <th>Submission Date</th>
+                  <th>Workflow Status</th>
+                  <th>Details Action</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody">
+                <!-- Dynamically populated table list -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- ================= TAB: CMS & PAGES ================= -->
+      <!-- ================= TAB: CMS & SLIDER ================= -->
       <section id="tab-cms" class="tab-pane">
         <div class="cms-layout">
           <div class="cms-tabs glass">
-            <button class="cms-tab-btn active" data-cms-section="about">About Page</button>
-            <button class="cms-tab-btn" data-cms-section="settings">General Settings</button>
-            <button class="cms-tab-btn" data-cms-section="sliders">Home Sliders</button>
+            <button class="cms-tab-btn active" data-cms-section="about">About Page Details</button>
+            <button class="cms-tab-btn" data-cms-section="sliders">Home Sliders / Banners</button>
+            <button class="cms-tab-btn" data-cms-section="seo">Sitemap & SEO Metadata</button>
           </div>
 
           <div class="cms-content-editor glass">
-            <!-- Edit Page: About -->
+            <!-- Edit Page: About Content -->
             <div id="cms-editor-about" class="cms-editor-pane active">
               <h3>Edit About Us Details</h3>
               <form id="aboutPageForm">
                 <div class="input-group">
-                  <label>Hero Title</label>
+                  <label>Hero Welcome Title</label>
                   <input type="text" id="aboutHeroTitle" required>
                 </div>
                 <div class="input-group">
-                  <label>Hero Subtitle</label>
+                  <label>Hero Welcome Subtitle</label>
                   <input type="text" id="aboutHeroSubtitle" required>
                 </div>
                 <div class="input-group">
-                  <label>Our History</label>
-                  <textarea id="aboutHistory" rows="3" required></textarea>
+                  <label>Our Mission & History (Supports Rich Text/Markdown)</label>
+                  <textarea id="aboutHistory" rows="8" required placeholder="Enter description details..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Save Content</button>
+                <button type="submit" class="btn btn-primary">Save Content Changes</button>
               </form>
             </div>
 
-            <!-- Edit Page: Settings -->
-            <div id="cms-editor-settings" class="cms-editor-pane">
-              <h3>General Settings & Metadata</h3>
-              <form id="settingsPageForm">
-                <div class="input-group">
-                  <label>Company Name</label>
-                  <input type="text" id="settingsCompanyName" required>
-                </div>
-                <div class="input-group">
-                  <label>Support Hours</label>
-                  <input type="text" id="settingsSupportHours" required>
-                </div>
-                <div class="input-group">
-                  <label>SEO Meta Title</label>
-                  <input type="text" id="settingsMetaTitle">
-                </div>
-                <div class="input-group">
-                  <label>SEO Meta Description</label>
-                  <textarea id="settingsMetaDesc" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Save Settings</button>
-              </form>
-            </div>
-
-            <!-- Edit: Sliders -->
+            <!-- Edit: Sliders Grid & Modals -->
             <div id="cms-editor-sliders" class="cms-editor-pane">
               <div class="section-header">
-                <h3>Sliders & Banners</h3>
-                <button id="addSliderBtn" class="btn btn-primary">+ Add New Slide</button>
+                <h3>Slider Banners</h3>
+                <button id="addSliderBtn" class="btn btn-primary">+ Add Slide</button>
               </div>
               <div class="sliders-list" id="slidersList">
-                <!-- Sliders dynamically populated -->
+                <!-- Dynamically loaded list of slider rows -->
               </div>
+            </div>
+
+            <!-- Edit: SEO Management -->
+            <div id="cms-editor-seo" class="cms-editor-pane">
+              <h3>Meta Headers & SEO Optimization</h3>
+              <form id="seoSettingsForm">
+                <div class="input-group">
+                  <label>Default Page Title</label>
+                  <input type="text" id="seoMetaTitle" required>
+                </div>
+                <div class="input-group">
+                  <label>Default Page Meta Description</label>
+                  <textarea id="seoMetaDescription" rows="4" required></textarea>
+                </div>
+                <div class="input-group">
+                  <label>Canonical Base URL</label>
+                  <input type="url" id="seoCanonicalUrl" placeholder="https://wssbhuj.in">
+                </div>
+                <button type="submit" class="btn btn-primary">Save SEO Tags</button>
+              </form>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= TAB: USER ACCOUNTS ================= -->
+      <!-- ================= TAB: MEDIA MANAGER ================= -->
+      <section id="tab-media" class="tab-pane">
+        <div class="media-container-grid">
+          <!-- Folder browser panel -->
+          <div class="media-folders glass">
+            <h3>Folder Directory</h3>
+            <div class="folder-list" id="mediaFolderList">
+              <div class="folder-item active" data-folder="all">
+                <i data-lucide="folder"></i> <span>All Assets</span>
+              </div>
+              <div class="folder-item" data-folder="sliders">
+                <i data-lucide="folder"></i> <span>Slider Banners</span>
+              </div>
+              <div class="folder-item" data-folder="gallery">
+                <i data-lucide="folder"></i> <span>Gallery Photos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Files grid panel -->
+          <div class="media-display glass">
+            <div class="media-toolbar">
+              <!-- Drag and drop zone -->
+              <div class="drag-drop-zone" id="mediaUploadZone">
+                <i data-lucide="upload-cloud"></i>
+                <p>Drag file here or click to select upload asset (Base64 MIME protected)</p>
+                <input type="file" id="mediaFileInput" style="display: none;" multiple>
+              </div>
+            </div>
+            
+            <div class="media-grid" id="mediaGrid">
+              <!-- Dynamically populated files list -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: USER & ROLE ACCOUNTS ================= -->
       <section id="tab-users" class="tab-pane">
         <div class="section-header">
-          <h2>User & Role Accounts</h2>
+          <h2>User Accounts</h2>
           <button id="createUserBtn" class="btn btn-primary">+ Create User</button>
         </div>
         <div class="users-list-container glass">
@@ -225,46 +435,44 @@
               <tr>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Role</th>
+                <th>Assigned Role</th>
                 <th>Status</th>
-                <th>Created</th>
+                <th>Date Created</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="usersTableBody">
-              <!-- Users dynamic rows -->
+              <!-- User rows dynamically updated -->
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- ================= TAB: MEDIA MANAGER ================= -->
-      <section id="tab-media" class="tab-pane">
-        <div class="media-toolbar glass">
-          <form id="uploadMediaForm" class="upload-bar">
-            <input type="file" id="mediaFileInput" required>
-            <button type="submit" class="btn btn-primary">Upload File</button>
-          </form>
-        </div>
-
-        <div class="media-grid" id="mediaGrid">
-          <!-- Files listed here -->
-        </div>
-      </section>
-
-      <!-- ================= TAB: LOGS ================= -->
+      <!-- ================= TAB: AUDIT LOGS ================= -->
       <section id="tab-logs" class="tab-pane">
         <div class="cms-tabs glass">
-          <button class="log-tab-btn active" data-log-type="activity">Activity Logs</button>
-          <button class="log-tab-btn" data-log-type="login">Login Audit Logs</button>
+          <button class="log-tab-btn active" data-log-type="activity">System Activities</button>
+          <button class="log-tab-btn" data-log-type="login">Login History</button>
         </div>
-        <div class="logs-container glass">
+        
+        <div class="toolbar-section glass" style="margin-top: 15px;">
+          <div class="search-box" style="width: 250px;">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="logSearchInput" placeholder="Search log entries...">
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+            <button class="btn btn-secondary" id="exportPdfBtn">Export PDF</button>
+          </div>
+        </div>
+
+        <div class="logs-container glass" style="margin-top: 15px;">
           <table class="data-table">
             <thead id="logsTableHeader">
-              <!-- headers dynamic -->
+              <!-- Dynamically rendered -->
             </thead>
             <tbody id="logsTableBody">
-              <!-- logs dynamic rows -->
+              <!-- Logs items dynamic list -->
             </tbody>
           </table>
         </div>
@@ -293,10 +501,80 @@
         </div>
       </section>
 
+      <!-- ================= TAB: SYSTEM SETTINGS ================= -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="settings-layout">
+          <!-- Form parameters card -->
+          <div class="settings-card glass">
+            <h3>Enterprise Platform Parameters</h3>
+            <form id="settingsGeneralForm">
+              <div class="input-group">
+                <label>Theme Scheme</label>
+                <select id="settingsTheme" class="glass-input">
+                  <option value="dark-purple">SaaS Purple Neon</option>
+                  <option value="dark-green">SaaS Green Aurora</option>
+                </select>
+              </div>
+
+              <!-- Maintenance Mode Toggle Switch -->
+              <div class="toggle-group">
+                <div class="toggle-meta">
+                  <span class="toggle-title">System Maintenance Mode</span>
+                  <span class="toggle-desc">Direct all traffic to splash updates information page</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingsMaintenanceMode">
+                  <span class="slider-round"></span>
+                </label>
+              </div>
+
+              <div class="input-group">
+                <label>SMTP Host Server</label>
+                <input type="text" id="settingsSmtpHost" class="glass-input">
+              </div>
+              <div class="input-group">
+                <label>SMTP Password Credentials</label>
+                <input type="password" id="settingsSmtpPassword" class="glass-input" placeholder="••••••••">
+              </div>
+
+              <button type="submit" class="btn btn-primary">Save Settings Configuration</button>
+            </form>
+          </div>
+
+          <!-- Diagnostic Server Info -->
+          <div class="settings-card glass">
+            <h3>System Properties Diagnostic</h3>
+            <div class="diagnostic-list">
+              <div class="diag-row">
+                <span>Architecture</span>
+                <strong>NodeJS Express + MySQL</strong>
+              </div>
+              <div class="diag-row">
+                <span>API Gateway Port</span>
+                <strong>8000</strong>
+              </div>
+              <div class="diag-row">
+                <span>Docker Container Status</span>
+                <strong class="text-blue">Active (1 Instance)</strong>
+              </div>
+              <div class="diag-row">
+                <span>PM2 Daemon Mode</span>
+                <strong class="text-green">Cluster Active</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
-  <!-- Detail/Edit Modal popup -->
+  <!-- Global Toast Notifications Center container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ================= POPUP MODALS ================= -->
+  
+  <!-- Detail Modal -->
   <div id="leadModal" class="modal-overlay hidden">
     <div class="modal-content glass">
       <div class="modal-header">
@@ -304,15 +582,15 @@
         <button id="closeModalBtn" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body" id="modalBody">
-        <!-- populated dynamically -->
+        <!-- Populated dynamically -->
       </div>
       <div class="modal-footer" id="modalFooter">
-        <!-- dynamic action buttons -->
+        <!-- Dynamic buttons -->
       </div>
     </div>
   </div>
 
-  <!-- User Create/Edit Modal -->
+  <!-- User Modal -->
   <div id="userModal" class="modal-overlay hidden">
     <div class="modal-content glass">
       <div class="modal-header">
@@ -339,6 +617,9 @@
               <option value="1">Super Admin</option>
               <option value="2">Admin</option>
               <option value="3">Editor</option>
+              <option value="4">Moderator</option>
+              <option value="5">Support</option>
+              <option value="6">Viewer</option>
             </select>
           </div>
           <div class="input-group">
@@ -346,6 +627,7 @@
             <select id="userStatus">
               <option value="Active">Active</option>
               <option value="Suspended">Suspended</option>
+              <option value="Banned">Banned</option>
             </select>
           </div>
         </div>
@@ -357,7 +639,7 @@
     </div>
   </div>
 
-  <!-- Slider Add/Edit Modal -->
+  <!-- Slider Modal -->
   <div id="sliderModal" class="modal-overlay hidden">
     <div class="modal-content glass">
       <div class="modal-header">

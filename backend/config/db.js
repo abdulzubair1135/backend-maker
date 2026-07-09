@@ -17,25 +17,22 @@ let isConnected = false;
 
 async function initDb() {
   try {
-    // Test connection
     pool = mysql.createPool(dbConfig);
     const conn = await pool.getConnection();
-    console.log(`✅ Database Connected successfully to MySQL (${dbConfig.host}:${dbConfig.port}/${dbConfig.database})`);
+    console.log(`✅ Database connection connect ho gaya hai boss! MySQL is active on: ${dbConfig.host}:${dbConfig.port}`);
     conn.release();
     isConnected = true;
   } catch (err) {
-    console.error('❌ Database connection failed. Please check if your MySQL server is running.');
-    console.error('Error Details:', err.message);
-    console.log('⚠️ Running in disconnected mode. Dynamic queries will fail until MySQL is started.');
+    console.error('❌ Arre yaar! Database connection fail ho gaya. Check karo MySQL chal raha hai ya nahi.');
+    console.error('Error ka details ye hai:', err.message);
+    console.log('⚠️ Server abhi offline/disconnected mode me chalega. Bina MySQL ke data insert nahi ho payega.');
     isConnected = false;
   }
 }
 
-// Automatic initialization
 initDb();
 
 module.exports = {
-  // Query helper with error handling
   async query(sql, params) {
     if (!pool) {
       pool = mysql.createPool(dbConfig);
@@ -44,13 +41,12 @@ module.exports = {
       const [results] = await pool.query(sql, params);
       return results;
     } catch (err) {
-      console.error(`Database query error: ${sql}`);
+      console.error(`❌ Query error aa gaya bhai: ${sql}`);
       console.error(err);
       throw err;
     }
   },
   
-  // Direct pool access
   getPool() {
     return pool;
   },

@@ -320,25 +320,60 @@ module.exports = {
   // 9. Lead Submissions (Contact form, Audit request, Recharge bookings)
   async submitLead(req, res) {
     const { name, email, phone, category, details } = req.body;
-    const detailsStr = typeof details === 'object' ? JSON.stringify(details) : details;
+    const detailsObj = typeof details === 'string' ? JSON.parse(details || '{}') : (details || {});
 
     try {
       if (!name || !phone || !category) {
-        return res.status(400).json({ error: 'Name, phone and category are required' });
+        return res.status(400).json({ error: 'Name, phone aur category teenon bhejni jaruri hai bhai!' });
       }
 
-      const result = await db.query(
-        'INSERT INTO leads (name, email, phone, category, details) VALUES (?, ?, ?, ?, ?)',
-        [name, email, phone, category, detailsStr]
-      );
+      if (!db.isConnected()) {
+        console.warn('⚠️ Server disconnected mode me hai, lead backup locally log ho rahi hai.');
+        console.log('Lead Details:', { name, email, phone, category, detailsObj });
+        return res.status(201).json({
+          success: true,
+          message: 'Lead backup recorded locally (offline mode active)'
+        });
+      }
+
+      let result;
+      if (category === 'contact') {
+        result = await db.query(
+          'INSERT INTO contact (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)',
+          [name, email, phone, detailsObj.subject || 'General Inquiry', detailsObj.message || '']
+        );
+      } else if (category === 'audit') {
+        result = await db.query(
+          'INSERT INTO enquiry (name, email, phone, company, service_type, details) VALUES (?, ?, ?, ?, ?, ?)',
+          [name, email, phone, detailsObj.company || 'N/A', detailsObj.division || 'General', detailsObj.details || '']
+        );
+      } else if (category === 'dish_billing' || category === 'ott_billing') {
+        const dbCategory = category === 'dish_billing' ? 'dish' : 'ott';
+        result = await db.query(
+          `INSERT INTO billing_recharges 
+           (customer_name, customer_phone, customer_email, category, pack_name, amount, vc_number, payment_method) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            name, 
+            phone, 
+            email || null, 
+            dbCategory, 
+            detailsObj.packName || detailsObj.plan || 'Subscription', 
+            parseFloat(detailsObj.amount || 0), 
+            detailsObj.vcNumber || null, 
+            detailsObj.paymentMethod || 'UPI'
+          ]
+        );
+      }
 
       res.status(201).json({
         success: true,
-        message: 'Lead submitted successfully',
-        id: result.insertId
+        message: 'Lead data dynamic database me successfully connect aur insert ho gayi hai boss! ✅',
+        id: result ? result.insertId : null
       });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error('Lead submit error:', err.message);
+      res.status(500).json({ error: 'Lead data submit nahi ho paaya, internal error.' });
     }
   }
 };
