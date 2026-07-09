@@ -828,3 +828,8 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Modals ko hide karne ke liye utility class */
+.hidden {
+  display: none !important;
+}
