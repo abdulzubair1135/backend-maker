@@ -1,28 +1,200 @@
 <!doctype html>
 <html lang="en">
-
-
 <!-- Mirrored from wssbhuj.in/ by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Jul 2026 13:37:41 GMT -->
 <!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com/">
   <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet">
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="assets/logoo1-BQQUxB1t.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>websoft-solution</title>
+  <title>Websoft Solutions - Telecom & Networks</title>
   <script type="module" crossorigin src="assets/index-jwZATq1Z.js"></script>
   <link rel="stylesheet" crossorigin href="assets/index-B40KudlW.css">
 </head>
-
 <body>
-  <div id="root"></div>
+  <div id="root"></div>
+
+  <!-- ========================================================
+       💎 Enterprise SaaS Visitor Tracking & Form Integrations
+       ======================================================== -->
+  <script>
+    (function() {
+      // 1. Generate / Retrieve IDs
+      let visitorId = localStorage.getItem('wss_visitor_id');
+      if (!visitorId) {
+        visitorId = 'v_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        localStorage.setItem('wss_visitor_id', visitorId);
+      }
+      
+      let sessionId = sessionStorage.getItem('wss_session_id');
+      if (!sessionId) {
+        sessionId = 's_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        sessionStorage.setItem('wss_session_id', sessionId);
+      }
+
+      const cookieId = document.cookie.replace(/(?:(?:^|.*;\s*)csrfToken\s*\=\s*([^;]*).*$)|^.*$/, "$1") || visitorId;
+
+      // UTM campaigns parsing
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = urlParams.get('utm_source');
+      const utmMedium = urlParams.get('utm_medium');
+      const utmCampaign = urlParams.get('utm_campaign');
+
+      // Browser / OS detection helpers
+      const ua = navigator.userAgent;
+      let browser = 'Other';
+      if (ua.includes('Chrome')) browser = 'Chrome';
+      else if (ua.includes('Safari')) browser = 'Safari';
+      else if (ua.includes('Firefox')) browser = 'Firefox';
+      else if (ua.includes('Edge')) browser = 'Edge';
+
+      let os = 'Unknown OS';
+      if (ua.includes('Windows')) os = 'Windows';
+      else if (ua.includes('Mac')) os = 'macOS';
+      else if (ua.includes('Android')) os = 'Android';
+      else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+      const device = /Mobi|Android/i.test(ua) ? 'Mobile' : 'Desktop';
+      const resolution = window.screen.width + 'x' + window.screen.height;
+
+      // Stats counters
+      let mouseCount = 0;
+      let keyboardCount = 0;
+      let clicksCount = 0;
+      let scrollDepth = 0;
+      let startTime = Date.now();
+      let visitedPages = [window.location.pathname];
+
+      // Track activities listeners
+      window.addEventListener('mousemove', () => mouseCount++);
+      window.addEventListener('keypress', () => keyboardCount++);
+      window.addEventListener('click', (e) => {
+        clicksCount++;
+        // track visited pages if route changed in React Router
+        if (window.location.pathname !== visitedPages[visitedPages.length - 1]) {
+          visitedPages.push(window.location.pathname);
+        }
+      });
+      window.addEventListener('scroll', () => {
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (totalHeight > 0) {
+          const depth = Math.round((window.scrollY / totalHeight) * 100);
+          if (depth > scrollDepth) scrollDepth = depth;
+        }
+      });
+
+      // Prepare payload data
+      function getPayload(exit = false) {
+        return {
+          visitorId,
+          sessionId,
+          cookieId,
+          currentUrl: window.location.href,
+          referrer: document.referrer || 'Direct',
+          language: navigator.language,
+          resolution,
+          browser,
+          browserVersion: 'Latest',
+          os,
+          device,
+          entryPage: visitedPages[0],
+          exitPage: exit ? window.location.pathname : null,
+          utmSource,
+          utmMedium,
+          utmCampaign,
+          mouseCount,
+          keyboardCount,
+          scrollDepth,
+          clicksCount,
+          pageViews: visitedPages.length,
+          duration: Math.round((Date.now() - startTime) / 1000),
+          visitedPages: visitedPages.join(','),
+          loginStatus: 'Guest'
+        };
+      }
+
+      // Send to endpoint
+      async function sendTracking(exit = false) {
+        try {
+          const payload = getPayload(exit);
+          if (exit && navigator.sendBeacon) {
+            navigator.sendBeacon('/api/v1/track', JSON.stringify(payload));
+          } else {
+            fetch('/api/v1/track', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          }
+        } catch (e) {}
+      }
+
+      // Track intervals
+      setTimeout(sendTracking, 1000); // initial load track
+      setInterval(sendTracking, 15000); // keep alive intervals every 15s
+      window.addEventListener('beforeunload', () => sendTracking(true));
+
+      // 2. Global Form Interceptor (Saves every submit dynamically to backend MySQL)
+      document.addEventListener('submit', async (e) => {
+        const form = e.target;
+        
+        // Skip tracking forms or external widgets if any
+        if (form.getAttribute('data-no-intercept') === 'true') return;
+        
+        e.preventDefault();
+
+        // Extract values
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((v, k) => {
+          data[k] = v;
+        });
+
+        // Determine destination endpoint based on inputs or page url
+        let endpoint = '/api/v1/contact';
+        const url = window.location.pathname;
+
+        if (url.includes('request-audit')) {
+          endpoint = '/api/v1/request-audit';
+        } else if (url.includes('dish-billing')) {
+          endpoint = '/api/v1/dish-billing';
+        } else if (url.includes('ott-billing')) {
+          endpoint = '/api/v1/ott-billing';
+        } else if (url.includes('payment')) {
+          endpoint = '/api/v1/payment/submit';
+        } else if (data.email && !data.phone && !data.message) {
+          // Newsletter form
+          endpoint = '/api/v1/newsletter/subscribe';
+          // Wrap for general submit
+          data.category = 'newsletter';
+          data.details = { subscribe: true };
+          data.name = 'Subscriber';
+          data.phone = '0000000000';
+        }
+
+        try {
+          // If SMTP details are empty, we handle values safely
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          
+          if (res.ok) {
+            alert('Arre bhai! Aapka response database me safe ho gaya hai boss. Thank you! ✅');
+            form.reset();
+          } else {
+            const errData = await res.json();
+            alert(errData.error || 'Dada, form submit karne me issue aa raha hai. Server error!');
+          }
+        } catch (err) {
+          alert('Arre yaar! Server connection fails ho gaya.');
+        }
+      });
+    })();
+  </script>
 </body>
-
-
-<!-- Mirrored from wssbhuj.in/ by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Jul 2026 13:37:42 GMT -->
 </html>

@@ -72,9 +72,11 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'Uploads')));
 
 // Apply rate limiter to API routes
 app.use('/api', apiLimiter);
+app.use('/api/v1', apiLimiter);
 
 // Mount API routes
 app.use('/api', apiRoutes);
+app.use('/api/v1', apiRoutes);
 
 // Serve Admin Panel at /admin route
 app.use('/admin', express.static(path.join(__dirname, '..', 'Admin')));

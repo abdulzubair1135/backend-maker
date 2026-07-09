@@ -6,9 +6,11 @@ const cms = require('../controllers/cmsController');
 const admin = require('../controllers/adminController');
 const media = require('../controllers/mediaController');
 const backup = require('../controllers/backupController');
+const tracking = require('../controllers/trackingController');
 
 const { requireAuth, requirePermission } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
+const upload = require('../middleware/upload');
 
 // ----------------------------------------------------
 // Public APIs
@@ -16,6 +18,7 @@ const { authLimiter } = require('../middleware/rateLimiter');
 router.post('/auth/login', authLimiter, auth.login);
 router.post('/auth/refresh', auth.refresh);
 router.post('/auth/logout', auth.logout);
+router.post('/track', tracking.trackVisitor);
 
 // CMS Public View API
 router.get('/cms/pages/:name', cms.getPage);
@@ -54,6 +57,11 @@ router.post('/ott-billing', (req, res) => {
 });
 
 router.post('/leads/submit', cms.submitLead);
+router.post('/newsletter/subscribe', cms.submitLead);
+router.post('/payment/submit', (req, res) => {
+  req.body.category = 'ott_billing'; // Process payment billing directly
+  cms.submitLead(req, res);
+});
 
 // ----------------------------------------------------
 // Protected Admin Dashboard & Configuration APIs
@@ -122,7 +130,7 @@ router.get('/admin/logs/login', requirePermission('all'), admin.getLoginLogs);
 
 // Media Manager
 router.get('/media', requirePermission('media.manage'), media.listMedia);
-router.post('/media/upload', requirePermission('media.manage'), media.uploadMedia);
+router.post('/media/upload', requirePermission('media.manage'), upload.single('file'), media.uploadMedia);
 router.delete('/media/:filename', requirePermission('media.manage'), media.deleteMedia);
 
 // Backup Manager

@@ -432,3 +432,48 @@ CREATE TABLE IF NOT EXISTS billing_recharges (
   notes TEXT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 42. Visitor Tracking Logs Table (User Activity Tracking)
+CREATE TABLE IF NOT EXISTS visitor_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  visitor_id VARCHAR(100) DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  country VARCHAR(100) DEFAULT NULL,
+  state VARCHAR(100) DEFAULT NULL,
+  city VARCHAR(100) DEFAULT NULL,
+  latitude VARCHAR(50) DEFAULT NULL,
+  longitude VARCHAR(50) DEFAULT NULL,
+  timezone VARCHAR(50) DEFAULT NULL,
+  language VARCHAR(50) DEFAULT NULL,
+  browser VARCHAR(100) DEFAULT NULL,
+  browser_version VARCHAR(50) DEFAULT NULL,
+  operating_system VARCHAR(100) DEFAULT NULL,
+  device VARCHAR(50) DEFAULT NULL, -- Mobile/Desktop
+  resolution VARCHAR(50) DEFAULT NULL,
+  isp VARCHAR(150) DEFAULT NULL,
+  user_agent TEXT DEFAULT NULL,
+  entry_page VARCHAR(255) DEFAULT NULL,
+  landing_page VARCHAR(255) DEFAULT NULL,
+  referrer VARCHAR(500) DEFAULT NULL,
+  utm_source VARCHAR(100) DEFAULT NULL,
+  utm_medium VARCHAR(100) DEFAULT NULL,
+  utm_campaign VARCHAR(100) DEFAULT NULL,
+  current_url VARCHAR(255) DEFAULT NULL,
+  session_id VARCHAR(255) DEFAULT NULL,
+  visit_duration INT DEFAULT 0, -- in seconds
+  exit_page VARCHAR(255) DEFAULT NULL,
+  last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  mouse_activity_count INT DEFAULT 0,
+  keyboard_activity_count INT DEFAULT 0,
+  scroll_depth INT DEFAULT 0,
+  page_views INT DEFAULT 1,
+  total_clicks INT DEFAULT 0,
+  visited_pages TEXT DEFAULT NULL, -- comma separated list
+  visit_count INT DEFAULT 1,
+  bounce BOOLEAN DEFAULT TRUE,
+  returning_visitor BOOLEAN DEFAULT FALSE,
+  cookie_id VARCHAR(255) DEFAULT NULL,
+  login_status VARCHAR(20) DEFAULT 'Guest',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
