@@ -28,7 +28,7 @@ module.exports = {
       let isDbOffline = !db.isConnected();
 
       try {
-        users = await db.query('SELECT u.id, u.username, u.email, u.status, r.name as roleName, r.permissions FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?', [decoded.id]);
+        users = await db.query('SELECT u.id, u.username, u.email, u.status, r.name as roleName, r.permissions FROM admins u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?', [decoded.id]);
       } catch (dbErr) {
         console.warn('⚠️ Authentication query failed. Using offline fallback admin details.');
         isDbOffline = true;

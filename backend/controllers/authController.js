@@ -21,7 +21,7 @@ module.exports = {
       let isDbOffline = !db.isConnected();
 
       try {
-        users = await db.query('SELECT u.*, r.name as roleName FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.username = ?', [username]);
+        users = await db.query('SELECT u.*, r.name as roleName FROM admins u LEFT JOIN roles r ON u.role_id = r.id WHERE u.username = ?', [username]);
       } catch (dbErr) {
         console.warn('⚠️ Database query failed. Using offline fallback admin authentication.');
         isDbOffline = true;
@@ -107,8 +107,8 @@ module.exports = {
         await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
           [username, ip, 'Success', `Logged in as ${user.roleName}`]);
 
-        await db.query('INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?)', 
-          [user.id, 'User Login', 'Logged in to dashboard control panel', ip]);
+        await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)', 
+          [user.id, 'User Login', 'Logged in to dashboard control panel']);
       }
 
       // Set cookie for cookies auth option
@@ -151,7 +151,7 @@ module.exports = {
       const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
 
       // Get user
-      const users = await db.query('SELECT u.id, u.username, r.name as roleName FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?', [decoded.id]);
+      const users = await db.query('SELECT u.id, u.username, r.name as roleName FROM admins u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?', [decoded.id]);
       if (users.length === 0) return res.status(403).json({ error: 'User does not exist.' });
 
       const user = users[0];
@@ -200,7 +200,7 @@ module.exports = {
     try {
       // Generate a mock base32 secret key
       const secret = 'WSSCMSSECRET2026TOTPKEYBASE32';
-      await db.query('UPDATE users SET two_factor_secret = ?, two_factor_enabled = TRUE WHERE id = ?', [secret, userId]);
+      await db.query('UPDATE admins SET two_factor_secret = ?, two_factor_enabled = TRUE WHERE id = ?', [secret, userId]);
       res.json({ success: true, secret, qrCodeUrl: `otpauth://totp/WebsoftSolutions:${req.user.username}?secret=${secret}&issuer=WebsoftSolutions` });
     } catch (err) {
       res.status(500).json({ error: 'Failed to configure 2FA.' });

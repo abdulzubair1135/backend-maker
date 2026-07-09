@@ -22,8 +22,8 @@ module.exports = {
         const uCount = await db.query('SELECT COUNT(*) as count FROM users');
         usersCount = uCount[0].count;
 
-        const cCount = await db.query('SELECT COUNT(*) as count FROM contact');
-        const eCount = await db.query('SELECT COUNT(*) as count FROM enquiry');
+        const cCount = await db.query("SELECT COUNT(*) as count FROM contacts WHERE subject NOT LIKE 'Audit:%'");
+        const eCount = await db.query("SELECT COUNT(*) as count FROM contacts WHERE subject LIKE 'Audit:%'");
         const bCount = await db.query('SELECT COUNT(*) as count FROM billing_recharges');
         
         totalLeads = cCount[0].count + eCount[0].count + bCount[0].count;
@@ -37,9 +37,9 @@ module.exports = {
         ];
 
         recentActivities = await db.query(
-          `SELECT a.*, u.username 
+          `SELECT a.*, ad.username 
            FROM activity_logs a 
-           LEFT JOIN users u ON a.user_id = u.id 
+           LEFT JOIN admins ad ON a.admin_id = ad.id 
            ORDER BY a.created_at DESC LIMIT 5`
         );
       }
@@ -49,7 +49,7 @@ module.exports = {
           users: usersCount,
           leads: totalLeads,
           pending: systemStats.pendingLeads,
-          contacted: 0, // calculated client side or not needed
+          contacted: 0,
           completed: 0,
           ...systemStats
         },
@@ -62,17 +62,17 @@ module.exports = {
     }
   },
 
-  // 2. User Management
+  // 2. User Management (CRUD for user admin dashboard accounts)
   async listUsers(req, res) {
     try {
       if (!db.isConnected()) {
         return res.json([{ id: 1, username: 'admin', email: 'admin@websoft.in', status: 'Active', roleName: 'Super Admin', roleId: 1 }]);
       }
       const users = await db.query(
-        `SELECT u.id, u.username, u.email, u.status, u.two_factor_enabled, u.created_at, 
+        `SELECT a.id, a.username, a.email, a.status, 
                 r.id as roleId, r.name as roleName 
-         FROM users u 
-         LEFT JOIN roles r ON u.role_id = r.id`
+         FROM admins a 
+         LEFT JOIN roles r ON a.role_id = r.id`
       );
       res.json(users);
     } catch (err) {
@@ -95,12 +95,12 @@ module.exports = {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const result = await db.query(
-        'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)',
+        'INSERT INTO admins (username, email, password, role_id) VALUES (?, ?, ?, ?)',
         [username, email, hashedPassword, roleId]
       );
 
       if (req.user) {
-        await db.query('INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)',
+        await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)',
           [req.user.id, 'Create User', `Naya user banaya: ${username}`]);
       }
 
@@ -121,7 +121,7 @@ module.exports = {
         return res.status(400).json({ error: 'Database offline hai!' });
       }
 
-      let queryStr = 'UPDATE users SET email = ?, role_id = ?, status = ?';
+      let queryStr = 'UPDATE admins SET email = ?, role_id = ?, status = ?';
       const params = [email, roleId, status];
 
       if (password) {
@@ -137,7 +137,7 @@ module.exports = {
       await db.query(queryStr, params);
 
       if (req.user) {
-        await db.query('INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)',
+        await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)',
           [req.user.id, 'Update User', `User settings badla, ID: ${id}`]);
       }
 
@@ -156,10 +156,10 @@ module.exports = {
       if (!db.isConnected()) {
         return res.status(400).json({ error: 'DB offline!' });
       }
-      await db.query('DELETE FROM users WHERE id = ?', [id]);
+      await db.query('DELETE FROM admins WHERE id = ?', [id]);
 
       if (req.user) {
-        await db.query('INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)',
+        await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)',
           [req.user.id, 'Delete User', `User uda diya, ID: ${id}`]);
       }
 
@@ -191,7 +191,7 @@ module.exports = {
       await db.query('UPDATE roles SET permissions = ? WHERE id = ?', [permissionsStr, id]);
 
       if (req.user) {
-        await db.query('INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)',
+        await db.query('INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)',
           [req.user.id, 'Update Role Permissions', `Role ${id} ke permissions update kiye`]);
       }
 
@@ -208,9 +208,9 @@ module.exports = {
         return res.json([]);
       }
       const logs = await db.query(
-        `SELECT a.*, u.username 
+        `SELECT a.*, ad.username 
          FROM activity_logs a 
-         LEFT JOIN users u ON a.user_id = u.id 
+         LEFT JOIN admins ad ON a.admin_id = ad.id 
          ORDER BY a.created_at DESC LIMIT 200`
       );
       res.json(logs);
@@ -237,8 +237,8 @@ module.exports = {
       if (!db.isConnected()) {
         return res.json([]);
       }
-      const contacts = await db.query('SELECT id, name, email, phone, "contact" as category, status, message as details, notes, created_at FROM contact');
-      const enquiries = await db.query('SELECT id, name, email, phone, "audit" as category, status, details, notes, created_at FROM enquiry');
+      const contacts = await db.query("SELECT id, name, email, phone, 'contact' as category, status, message as details, notes, created_at FROM contacts WHERE subject NOT LIKE 'Audit:%'");
+      const enquiries = await db.query("SELECT id, name, email, phone, 'audit' as category, status, message as details, notes, created_at FROM contacts WHERE subject LIKE 'Audit:%'");
       const billings = await db.query('SELECT id, customer_name as name, customer_email as email, customer_phone as phone, IF(category="dish","dish_billing","ott_billing") as category, status, JSON_OBJECT("amount", amount, "packName", pack_name, "vcNumber", vc_number, "paymentMethod", payment_method) as details, notes, created_at FROM billing_recharges');
 
       const allLeads = [...contacts, ...enquiries, ...billings];
@@ -264,10 +264,8 @@ module.exports = {
     const { id } = req.params;
     const { status, notes, category } = req.body;
     try {
-      if (category === 'contact') {
-        await db.query('UPDATE contact SET status = ?, notes = ? WHERE id = ?', [status, notes, id]);
-      } else if (category === 'audit') {
-        await db.query('UPDATE enquiry SET status = ?, notes = ? WHERE id = ?', [status, notes, id]);
+      if (category === 'contact' || category === 'audit') {
+        await db.query('UPDATE contacts SET status = ?, notes = ? WHERE id = ?', [status, notes, id]);
       } else if (category === 'dish_billing' || category === 'ott_billing') {
         await db.query('UPDATE billing_recharges SET status = ?, notes = ? WHERE id = ?', [status, notes, id]);
       }
@@ -281,10 +279,8 @@ module.exports = {
     const { id } = req.params;
     const { category } = req.query;
     try {
-      if (category === 'contact') {
-        await db.query('DELETE FROM contact WHERE id = ?', [id]);
-      } else if (category === 'audit') {
-        await db.query('DELETE FROM enquiry WHERE id = ?', [id]);
+      if (category === 'contact' || category === 'audit') {
+        await db.query('DELETE FROM contacts WHERE id = ?', [id]);
       } else if (category === 'dish_billing' || category === 'ott_billing') {
         await db.query('DELETE FROM billing_recharges WHERE id = ?', [id]);
       }

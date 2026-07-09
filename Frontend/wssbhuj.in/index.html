@@ -175,11 +175,20 @@
           data.phone = '0000000000';
         }
 
+        const getCsrf = () => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; csrfToken=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return '';
+        };
+
         try {
-          // If SMTP details are empty, we handle values safely
           const res = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': getCsrf()
+            },
             body: JSON.stringify(data)
           });
           

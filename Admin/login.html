@@ -6,39 +6,347 @@
   <title>Admin Login - Websoft Solutions Control Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --bg-dark: #090514;
+      --card-glass: rgba(17, 10, 36, 0.65);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Floating glowing elements */
+    .glowing-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .glow-sphere {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.45;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    .glow-sphere-1 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, #8b5cf6 0%, rgba(139, 92, 246, 0) 70%);
+      top: -10%;
+      left: -10%;
+    }
+
+    .glow-sphere-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #3b82f6 0%, rgba(59, 130, 246, 0) 70%);
+      bottom: -15%;
+      right: -10%;
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(60px, 40px) scale(1.1); }
+      100% { transform: translate(-40px, -60px) scale(0.9); }
+    }
+
+    .login-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-glass);
+      border-radius: 28px;
+      padding: 48px 40px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    }
+
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+
+    .logo-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo-container h2 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .logo-container p {
+      color: var(--text-muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .input-field-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .input-field-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #c084fc;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .input-wrapper input:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--primary);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
+    }
+
+    /* Password eye icon */
+    .toggle-pass {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-pass:hover {
+      color: #fff;
+    }
+
+    .flex-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .checkbox-label input {
+      margin-right: 8px;
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+    }
+
+    .forgot-link {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .forgot-link:hover {
+      color: #93c5fd;
+    }
+
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.5);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    /* Spinner loader */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px border-transparent;
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 36px 24px;
+      }
+    }
+  </style>
 </head>
-<body class="login-body">
-  <div class="background-decor">
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
+<body>
+  <div class="glowing-bg">
+    <div class="glow-sphere glow-sphere-1"></div>
+    <div class="glow-sphere glow-sphere-2"></div>
   </div>
 
-  <div class="login-container">
-    <div class="login-card glass">
-      <div class="login-header">
-        <div class="logo-badge">WSS</div>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="logo-container">
+        <div class="logo-img">WSS</div>
         <h2>Control Panel</h2>
-        <p>Enter your credentials to manage Websoft Solutions</p>
+        <p>Enter credentials to access the admin CMS</p>
       </div>
 
-      <form id="loginForm" class="login-form">
-        <div class="input-group">
+      <div id="errorBox" class="error-box"></div>
+
+      <form id="loginForm">
+        <div class="input-field-group">
           <label for="username">Username</label>
-          <input type="text" id="username" required placeholder="e.g. admin">
+          <div class="input-wrapper">
+            <input type="text" id="username" required placeholder="e.g. admin" autocomplete="username">
+          </div>
         </div>
-        
-        <div class="input-group">
+
+        <div class="input-field-group">
           <label for="password">Password</label>
-          <input type="password" id="password" required placeholder="••••••••">
+          <div class="input-wrapper">
+            <input type="password" id="password" required placeholder="••••••••">
+            <button type="button" id="togglePassword" class="toggle-pass" aria-label="Toggle Password Visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
 
-        <div id="errorMessage" class="error-message hidden"></div>
+        <div class="flex-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="rememberMe">
+            Remember Me
+          </label>
+          <a href="#" id="forgotBtn" class="forgot-link">Forgot Password?</a>
+        </div>
 
-        <button type="submit" class="btn btn-primary btn-block">
-          <span>Sign In</span>
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <button type="submit" id="submitBtn" class="btn-login">
+          <span id="btnText">Sign In</span>
+          <div id="btnSpinner" class="spinner"></div>
         </button>
       </form>
     </div>
@@ -50,7 +358,27 @@
       window.location.href = './';
     }
 
-    // Cookie read karne ka helper for CSRF validation
+    // Auto-fill remembered username
+    if (localStorage.getItem('wss_remembered_username')) {
+      document.getElementById('username').value = localStorage.getItem('wss_remembered_username');
+      document.getElementById('rememberMe').checked = true;
+    }
+
+    // Password Show/Hide Toggle
+    const passwordField = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    togglePasswordBtn.addEventListener('click', () => {
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+    });
+
+    // Forgot Password Action handler
+    document.getElementById('forgotBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Arre bhai! Password reset karne ke liye direct system administrator se sampark karein ya terminal me seed check karein. 🔑');
+    });
+
+    // Cookie reader helper for CSRF header injection
     function getCookie(name) {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
@@ -58,37 +386,63 @@
       return '';
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('errorMessage');
+    // Form Submission
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const errorBox = document.getElementById('errorBox');
 
-      errorMsg.classList.add('hidden');
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = passwordField.value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      // Reset state
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'block';
 
       try {
         const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-CSRF-Token': getCookie('csrfToken') // Cookie se csrfToken read karke header me send kar rahe hain
+            'X-CSRF-Token': getCookie('csrfToken')
           },
           body: JSON.stringify({ username, password })
         });
 
         const result = await response.json();
+
         if (response.ok && result.success) {
+          // Store token
           localStorage.setItem('wss_admin_token', result.token);
           localStorage.setItem('wss_admin_refresh_token', result.refreshToken);
           localStorage.setItem('wss_admin_user', username);
+
+          // Save remember state
+          if (rememberMe) {
+            localStorage.setItem('wss_remembered_username', username);
+          } else {
+            localStorage.removeItem('wss_remembered_username');
+          }
+
           window.location.href = './';
         } else {
-          errorMsg.textContent = result.error || 'Mera bhai, galat username ya password dala hai!';
-          errorMsg.classList.remove('hidden');
+          errorBox.textContent = result.error || 'Galat username ya password dala hai bhai!';
+          errorBox.style.display = 'block';
         }
       } catch (err) {
-        errorMsg.textContent = 'Server se connection fail ho gaya hai.';
-        errorMsg.classList.remove('hidden');
+        errorBox.textContent = 'Server connection failed. Database status check karo!';
+        errorBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        btnText.style.display = 'block';
+        btnSpinner.style.display = 'none';
       }
     });
   </script>

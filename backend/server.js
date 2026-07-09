@@ -49,12 +49,12 @@ async function seedDefaultDatabase() {
     }
 
     // 2. Check and seed default Super Admin (admin / admin123)
-    const users = await db.query('SELECT COUNT(*) as count FROM users WHERE username = "admin"');
-    if (users[0].count === 0) {
+    const adminsCount = await db.query('SELECT COUNT(*) as count FROM admins WHERE username = "admin"');
+    if (adminsCount[0].count === 0) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
       await db.query(
-        'INSERT INTO users (username, email, password, role_id, status) VALUES ("admin", "admin@websoft.in", ?, 1, "Active")',
+        'INSERT INTO admins (username, email, password, role_id, status) VALUES ("admin", "admin@websoft.in", ?, 1, "Active")',
         [hashedPassword]
       );
       console.log('✅ Seeded default Super Admin user: admin / admin123');

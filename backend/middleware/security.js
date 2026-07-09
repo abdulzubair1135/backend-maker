@@ -70,6 +70,11 @@ module.exports = {
       return next();
     }
 
+    // Skip CSRF verification for tracking endpoint
+    if (req.path.endsWith('/track')) {
+      return next();
+    }
+
     // Verify token for POST, PUT, DELETE
     const cookieToken = req.cookies ? req.cookies.csrfToken : null;
     const headerToken = req.headers['x-csrf-token'];
