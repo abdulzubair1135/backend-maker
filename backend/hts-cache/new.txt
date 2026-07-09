@@ -1,0 +1,7 @@
+date	size'/'remotesize	flags(request:Update,Range state:File response:Modified,Chunked,gZipped)	statuscode	status ('servermsg')	MIME	Etag|Date	URL	localfile	(from URL)
+19:07:41	885/885	---M--	200	added ('OK')	text/html	etag:%22375-654ad5db6158c%22	https://wssbhuj.in/	C:/My%20Web%20Sites/backend/wssbhuj.in/index.html	(from )
+19:07:41	885/885	---M--	200	added ('OK')	text/html	etag:%22375-654ad5db6158c;654ad5f6fe2e1	https://wssbhuj.in/robots.txt		(from )
+19:07:41	57247/57247	---M--	200	added ('OK')	image/png	etag:%22df9f-654ad5e4ccb80%22	https://wssbhuj.in/assets/logoo1-BQQUxB1t.png	C:/My%20Web%20Sites/backend/wssbhuj.in/assets/logoo1-BQQUxB1t.png	(from https://wssbhuj.in/)
+19:07:42	198269/198269	---M--	200	added ('OK')	text/css	etag:%223067d-654ad5e494910%22	https://wssbhuj.in/assets/index-B40KudlW.css	C:/My%20Web%20Sites/backend/wssbhuj.in/assets/index-B40KudlW.css	(from https://wssbhuj.in/)
+19:07:42	1241673/1241673	---M--	200	added ('OK')	application/javascript	etag:%2212f249-654ad5e4b3158%22	https://wssbhuj.in/assets/index-jwZATq1Z.js	C:/My%20Web%20Sites/backend/wssbhuj.in/assets/index-jwZATq1Z.js	(from https://wssbhuj.in/)
+19:07:42	633/633	---M--	200	added ('OK')	image/png	etag:%22577a2692-279%22	https://www.transparenttextures.com/patterns/cubes.png	C:/My%20Web%20Sites/backend/www.transparenttextures.com/patterns/cubes.png	(from https://wssbhuj.in/assets/index-B40KudlW.css)
