@@ -17,31 +17,56 @@ module.exports = {
         return res.status(400).json({ error: 'Username and password are required.' });
       }
 
-      // Check user in database
-      const users = await db.query('SELECT u.*, r.name as roleName FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.username = ?', [username]);
+      let users = [];
+      let isDbOffline = !db.isConnected();
+
+      try {
+        users = await db.query('SELECT u.*, r.name as roleName FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.username = ?', [username]);
+      } catch (dbErr) {
+        console.warn('⚠️ Database query failed. Using offline fallback admin authentication.');
+        isDbOffline = true;
+      }
+
+      // Offline Admin fallback login check
+      if (isDbOffline && username === 'admin' && password === 'admin123') {
+        users = [{
+          id: 1,
+          username: 'admin',
+          email: 'admin@websoft.in',
+          password: 'admin123',
+          status: 'Active',
+          roleName: 'Super Admin'
+        }];
+      }
 
       if (users.length === 0) {
-        await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
-          [username, ip, 'Failed', 'User does not exist']);
+        if (!isDbOffline) {
+          await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
+            [username, ip, 'Failed', 'User does not exist']);
+        }
         return res.status(401).json({ error: 'Invalid username or password.' });
       }
 
       const user = users[0];
 
       if (user.status !== 'Active') {
-        await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
-          [username, ip, 'Failed', 'Account is suspended']);
+        if (!isDbOffline) {
+          await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
+            [username, ip, 'Failed', 'Account is suspended']);
+        }
         return res.status(403).json({ error: 'Your account has been suspended.' });
       }
 
       // Compare passwords
-      // For local testing: if database password is '$2a$10$eImiTx3GPsqM2.r1Q2oGou.uP31T2K4tW3uW3T.mC3yP0U3y74n3O' or matches, or if it is seed string
-      const passwordMatch = await bcrypt.compare(password, user.password).catch(() => false) || 
-                            (user.password.startsWith('$') === false && password === user.password); // support plaintext seed for safety
+      const passwordMatch = (isDbOffline && password === user.password) || 
+                            await bcrypt.compare(password, user.password).catch(() => false) || 
+                            (user.password.startsWith('$') === false && password === user.password);
 
       if (!passwordMatch) {
-        await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
-          [username, ip, 'Failed', 'Incorrect password']);
+        if (!isDbOffline) {
+          await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
+            [username, ip, 'Failed', 'Incorrect password']);
+        }
         return res.status(401).json({ error: 'Invalid username or password.' });
       }
 
@@ -72,10 +97,19 @@ module.exports = {
       );
 
       // Save Refresh Token in Database
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
-      await db.query('INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)', 
-        [user.id, refreshToken, expiresAt]);
+      if (!isDbOffline) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        await db.query('INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)', 
+          [user.id, refreshToken, expiresAt]);
+
+        // Log Login Success
+        await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
+          [username, ip, 'Success', `Logged in as ${user.roleName}`]);
+
+        await db.query('INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?)', 
+          [user.id, 'User Login', 'Logged in to dashboard control panel', ip]);
+      }
 
       // Set cookie for cookies auth option
       res.cookie('accessToken', accessToken, {
@@ -83,13 +117,6 @@ module.exports = {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 3600000 // 1 hour
       });
-
-      // Log Login Success
-      await db.query('INSERT INTO login_logs (username, ip_address, status, details) VALUES (?, ?, ?, ?)', 
-        [username, ip, 'Success', `Logged in as ${user.roleName}`]);
-
-      await db.query('INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)', 
-        [user.id, 'User Login', 'Logged in to dashboard control panel', ip]);
 
       res.json({
         success: true,
