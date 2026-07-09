@@ -6,8 +6,18 @@ yarn-error.log*
 .eslintcache
 
 # Local data and secrets
-backend/data/*.json
-!backend/data/admin.json
+.env
+Backend/.env
+Backend/data/*.json
+!Backend/data/admin.json
+
+# Media and logs
+Uploads/*
+!Uploads/.gitkeep
+Logs/*
+!Logs/.gitkeep
+Backups/*
+!Backups/.gitkeep
 
 # Backups
 *.bak

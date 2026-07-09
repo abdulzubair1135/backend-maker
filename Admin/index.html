@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>God Mode - Websoft Solutions Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+  <div class="background-decor">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+  </div>
+
+  <!-- Sidebar Nav -->
+  <aside class="admin-sidebar glass">
+    <div class="sidebar-header">
+      <div class="logo-badge">WSS</div>
+      <div class="brand-text">
+        <h2>Websoft</h2>
+        <span>Control Panel v2.0</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-tab="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-btn" data-tab="leads">
+        <span class="nav-icon">📥</span> Leads & Billings
+      </button>
+      <button class="nav-btn" data-tab="cms">
+        <span class="nav-icon">📝</span> CMS & Pages
+      </button>
+      <button class="nav-btn" data-tab="users">
+        <span class="nav-icon">👤</span> User Accounts
+      </button>
+      <button class="nav-btn" data-tab="media">
+        <span class="nav-icon">🖼️</span> Media Manager
+      </button>
+      <button class="nav-btn" data-tab="logs">
+        <span class="nav-icon">📜</span> System Logs
+      </button>
+      <button class="nav-btn" data-tab="backups">
+        <span class="nav-icon">💾</span> Database Backups
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="user-info">Logged in: <strong id="adminUsername">admin</strong></span>
+      <button id="logoutBtn" class="btn btn-secondary btn-block">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main View -->
+  <div class="admin-layout-content">
+    <header class="admin-header glass">
+      <div class="header-left">
+        <h1 id="viewTitle">Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <div id="csrfDisplay" style="font-size: 11px; color: var(--text-muted);">Secure CSRF Session Active</div>
+        <button id="refreshBtn" class="btn btn-secondary">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Refresh Data
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      
+      <!-- ================= TAB: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <!-- Stats cards -->
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <div class="stat-icon bg-purple">📥</div>
+            <div class="stat-info">
+              <h3>Total Leads</h3>
+              <p id="statTotal">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon bg-amber">⏳</div>
+            <div class="stat-info">
+              <h3>Pending</h3>
+              <p id="statPending">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon bg-blue">📞</div>
+            <div class="stat-info">
+              <h3>Contacted</h3>
+              <p id="statContacted">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon bg-green">✅</div>
+            <div class="stat-info">
+              <h3>Completed</h3>
+              <p id="statCompleted">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-details-grid">
+          <!-- Recent Activity -->
+          <div class="dashboard-block glass">
+            <h3>Recent System Activities</h3>
+            <div class="log-timeline" id="recentActivityList">
+              <p class="text-muted">Loading activity...</p>
+            </div>
+          </div>
+
+          <!-- Category distribution -->
+          <div class="dashboard-block glass">
+            <h3>Leads By Categories</h3>
+            <div class="category-list" id="categoryDistributionList">
+              <p class="text-muted">Loading metrics...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: LEADS ================= -->
+      <section id="tab-leads" class="tab-pane">
+        <div class="toolbar-section glass">
+          <div class="filter-group">
+            <label>Filter Category:</label>
+            <div class="pill-group" id="leadsCategoryFilter">
+              <button class="pill active" data-category="All">All Categories</button>
+              <button class="pill" data-category="contact">Inquiries</button>
+              <button class="pill" data-category="audit">Audits</button>
+              <button class="pill" data-category="dish_billing">DishTV</button>
+              <button class="pill" data-category="ott_billing">OTT Billing</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="leads-list" id="leadsList">
+          <p class="text-muted">Loading leads...</p>
+        </div>
+      </section>
+
+      <!-- ================= TAB: CMS & PAGES ================= -->
+      <section id="tab-cms" class="tab-pane">
+        <div class="cms-layout">
+          <div class="cms-tabs glass">
+            <button class="cms-tab-btn active" data-cms-section="about">About Page</button>
+            <button class="cms-tab-btn" data-cms-section="settings">General Settings</button>
+            <button class="cms-tab-btn" data-cms-section="sliders">Home Sliders</button>
+          </div>
+
+          <div class="cms-content-editor glass">
+            <!-- Edit Page: About -->
+            <div id="cms-editor-about" class="cms-editor-pane active">
+              <h3>Edit About Us Details</h3>
+              <form id="aboutPageForm">
+                <div class="input-group">
+                  <label>Hero Title</label>
+                  <input type="text" id="aboutHeroTitle" required>
+                </div>
+                <div class="input-group">
+                  <label>Hero Subtitle</label>
+                  <input type="text" id="aboutHeroSubtitle" required>
+                </div>
+                <div class="input-group">
+                  <label>Our History</label>
+                  <textarea id="aboutHistory" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Content</button>
+              </form>
+            </div>
+
+            <!-- Edit Page: Settings -->
+            <div id="cms-editor-settings" class="cms-editor-pane">
+              <h3>General Settings & Metadata</h3>
+              <form id="settingsPageForm">
+                <div class="input-group">
+                  <label>Company Name</label>
+                  <input type="text" id="settingsCompanyName" required>
+                </div>
+                <div class="input-group">
+                  <label>Support Hours</label>
+                  <input type="text" id="settingsSupportHours" required>
+                </div>
+                <div class="input-group">
+                  <label>SEO Meta Title</label>
+                  <input type="text" id="settingsMetaTitle">
+                </div>
+                <div class="input-group">
+                  <label>SEO Meta Description</label>
+                  <textarea id="settingsMetaDesc" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+              </form>
+            </div>
+
+            <!-- Edit: Sliders -->
+            <div id="cms-editor-sliders" class="cms-editor-pane">
+              <div class="section-header">
+                <h3>Sliders & Banners</h3>
+                <button id="addSliderBtn" class="btn btn-primary">+ Add New Slide</button>
+              </div>
+              <div class="sliders-list" id="slidersList">
+                <!-- Sliders dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: USER ACCOUNTS ================= -->
+      <section id="tab-users" class="tab-pane">
+        <div class="section-header">
+          <h2>User & Role Accounts</h2>
+          <button id="createUserBtn" class="btn btn-primary">+ Create User</button>
+        </div>
+        <div class="users-list-container glass">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Users dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= TAB: MEDIA MANAGER ================= -->
+      <section id="tab-media" class="tab-pane">
+        <div class="media-toolbar glass">
+          <form id="uploadMediaForm" class="upload-bar">
+            <input type="file" id="mediaFileInput" required>
+            <button type="submit" class="btn btn-primary">Upload File</button>
+          </form>
+        </div>
+
+        <div class="media-grid" id="mediaGrid">
+          <!-- Files listed here -->
+        </div>
+      </section>
+
+      <!-- ================= TAB: LOGS ================= -->
+      <section id="tab-logs" class="tab-pane">
+        <div class="cms-tabs glass">
+          <button class="log-tab-btn active" data-log-type="activity">Activity Logs</button>
+          <button class="log-tab-btn" data-log-type="login">Login Audit Logs</button>
+        </div>
+        <div class="logs-container glass">
+          <table class="data-table">
+            <thead id="logsTableHeader">
+              <!-- headers dynamic -->
+            </thead>
+            <tbody id="logsTableBody">
+              <!-- logs dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= TAB: DATABASE BACKUPS ================= -->
+      <section id="tab-backups" class="tab-pane">
+        <div class="section-header">
+          <h2>System Backups</h2>
+          <button id="createBackupBtn" class="btn btn-primary">💾 Trigger DB Backup</button>
+        </div>
+        <div class="backups-list-container glass">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Backup Name</th>
+                <th>File Size</th>
+                <th>Generated At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="backupsTableBody">
+              <!-- Backups list -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Detail/Edit Modal popup -->
+  <div id="leadModal" class="modal-overlay hidden">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 id="modalTitle">Details</h3>
+        <button id="closeModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- populated dynamically -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <!-- dynamic action buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- User Create/Edit Modal -->
+  <div id="userModal" class="modal-overlay hidden">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 id="userModalTitle">Manage Account</h3>
+        <button id="closeUserModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <form id="userForm">
+        <div class="modal-body">
+          <div class="input-group">
+            <label for="userUsername">Username</label>
+            <input type="text" id="userUsername" required>
+          </div>
+          <div class="input-group">
+            <label for="userEmail">Email</label>
+            <input type="email" id="userEmail" required>
+          </div>
+          <div class="input-group">
+            <label for="userPassword">Password (leave blank to keep current)</label>
+            <input type="password" id="userPassword">
+          </div>
+          <div class="input-group">
+            <label for="userRole">Role</label>
+            <select id="userRole" required>
+              <option value="1">Super Admin</option>
+              <option value="2">Admin</option>
+              <option value="3">Editor</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="userStatus">Status</label>
+            <select id="userStatus">
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="deleteUserBtn" class="btn btn-danger">Delete Account</button>
+          <button type="submit" class="btn btn-primary">Save User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Slider Add/Edit Modal -->
+  <div id="sliderModal" class="modal-overlay hidden">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 id="sliderModalTitle">Add/Edit Slide</h3>
+        <button id="closeSliderModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <form id="sliderForm">
+        <div class="modal-body">
+          <div class="input-group">
+            <label>Title</label>
+            <input type="text" id="slideTitle" required>
+          </div>
+          <div class="input-group">
+            <label>Subtitle</label>
+            <input type="text" id="slideSubtitle">
+          </div>
+          <div class="input-group">
+            <label>Image URL</label>
+            <input type="text" id="slideImageUrl" required placeholder="e.g. /uploads/banner.jpg">
+          </div>
+          <div class="input-group">
+            <label>Link URL</label>
+            <input type="text" id="slideLinkUrl" placeholder="e.g. /plans">
+          </div>
+          <div class="input-group">
+            <label>Sort Order</label>
+            <input type="number" id="slideSortOrder" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Slide</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

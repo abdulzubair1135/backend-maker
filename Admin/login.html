@@ -68,6 +68,7 @@
         const result = await response.json();
         if (response.ok && result.success) {
           localStorage.setItem('wss_admin_token', result.token);
+          localStorage.setItem('wss_admin_refresh_token', result.refreshToken);
           localStorage.setItem('wss_admin_user', username);
           window.location.href = './';
         } else {
